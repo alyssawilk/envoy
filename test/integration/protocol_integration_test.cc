@@ -208,7 +208,6 @@ TEST_P(ProtocolIntegrationTest, AddBodyToRequestAndWaitForIt) {
 }
 
 TEST_P(ProtocolIntegrationTest, AddBodyToResponseAndWaitForIt) {
-  EXCLUDE_UPSTREAM_HTTP3;
   // filters are prepended, so add them in reverse order
   config_helper_.addFilter(R"EOF(
   name: add-body-filter
@@ -231,7 +230,6 @@ TEST_P(ProtocolIntegrationTest, AddBodyToResponseAndWaitForIt) {
 }
 
 TEST_P(ProtocolIntegrationTest, ContinueHeadersOnlyInjectBodyFilter) {
-  EXCLUDE_UPSTREAM_HTTP3;
   config_helper_.addFilter(R"EOF(
   name: continue-headers-only-inject-body-filter
   typed_config:
@@ -421,7 +419,6 @@ TEST_P(DownstreamProtocolIntegrationTest, MissingHeadersLocalReply) {
 
 // Regression test for https://github.com/envoyproxy/envoy/issues/10270
 TEST_P(ProtocolIntegrationTest, LongHeaderValueWithSpaces) {
-  EXCLUDE_UPSTREAM_HTTP3;
   // Header with at least 20kb of spaces surrounded by non-whitespace characters to ensure that
   // dispatching is split across 2 dispatch calls. This threshold comes from Envoy preferring 16KB
   // reads, which the buffer rounds up to about 20KB when allocating slices in
@@ -459,7 +456,7 @@ TEST_P(ProtocolIntegrationTest, LongHeaderValueWithSpaces) {
 }
 
 TEST_P(ProtocolIntegrationTest, Retry) {
-  EXCLUDE_UPSTREAM_HTTP3;
+  //EXCLUDE_UPSTREAM_HTTP3;  // flakes with CHECK failed: (max_plaintext_size_) >= (PacketSize()).
   initialize();
   codec_client_ = makeHttpConnection(lookupPort("http"));
   auto response = codec_client_->makeRequestWithBody(
@@ -494,6 +491,11 @@ TEST_P(ProtocolIntegrationTest, Retry) {
   if (upstreamProtocol() == FakeHttpConnection::Type::HTTP2) {
     Stats::CounterSharedPtr counter =
         TestUtility::findCounter(stats, "cluster.cluster_0.http2.tx_reset");
+    ASSERT_NE(nullptr, counter);
+    EXPECT_EQ(1L, counter->value());
+  } else if (upstreamProtocol() == FakeHttpConnection::Type::HTTP3) {
+    Stats::CounterSharedPtr counter =
+        TestUtility::findCounter(stats, "cluster.cluster_0.upstream_rq_tx_reset");
     ASSERT_NE(nullptr, counter);
     EXPECT_EQ(1L, counter->value());
   } else {
@@ -1619,7 +1621,6 @@ TEST_P(ProtocolIntegrationTest, LargeRequestMethod) {
   // There will be no upstream connections for HTTP/1 downstream, we need to
   // test the full mesh regardless.
   testing_upstream_intentionally_ = true;
-  EXCLUDE_UPSTREAM_HTTP3; // TODO(#14829) Rejected with QUIC_STREAM_EXCESSIVE_LOAD
   const std::string long_method = std::string(48 * 1024, 'a');
   const Http::TestRequestHeaderMapImpl request_headers{{":method", long_method},
                                                        {":path", "/test/long/url"},

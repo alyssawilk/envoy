@@ -505,7 +505,7 @@ FakeUpstream::FakeUpstream(Network::TransportSocketFactoryPtr&& transport_socket
       dispatcher_(api_->allocateDispatcher("fake_upstream")),
       handler_(new Server::ConnectionHandlerImpl(*dispatcher_, 0)), config_(config),
       read_disable_on_new_connection_(true), enable_half_close_(config.enable_half_close_),
-      listener_(*this, http_type_ == FakeHttpConnection::Type::HTTP3),
+      listener_(*this, http_type_ == Http::CodecType::HTTP3),
       filter_chain_(Network::Test::createEmptyFilterChain(std::move(transport_socket_factory))) {
   ENVOY_LOG(info, "starting fake server at {}. UDP={} codec={}", localAddress()->asString(),
             config.udp_fake_upstream_.has_value(), FakeHttpConnection::typeToString(http_type_));
@@ -532,7 +532,7 @@ void FakeUpstream::cleanUp() {
 bool FakeUpstream::createNetworkFilterChain(Network::Connection& connection,
                                             const std::vector<Network::FilterFactoryCb>&) {
   absl::MutexLock lock(&lock_);
-  if (read_disable_on_new_connection_ && http_type_ != FakeHttpConnection::Type::HTTP3) {
+  if (read_disable_on_new_connection_ && http_type_ != Http::CodecType::HTTP3) {
     // Disable early close detection to avoid closing the network connection before full
     // initialization is complete.
     connection.detectEarlyCloseWhenReadDisabled(false);
@@ -545,7 +545,7 @@ bool FakeUpstream::createNetworkFilterChain(Network::Connection& connection,
   // Normally we don't associate a logical network connection with a FakeHttpConnection  until
   // waitForHttpConnection is called, but QUIC needs to be set up as packets come in, so we do
   // not lazily create for HTTP/3
-  if (http_type_ == FakeHttpConnection::Type::HTTP3) {
+  if (http_type_ == Http::CodecType::HTTP3) {
     quic_connections_.push_back(std::make_unique<FakeHttpConnection>(
         *this, consumeConnection(), http_type_, time_system_, config_.max_request_headers_kb_,
         config_.max_request_headers_count_, config_.headers_with_underscores_action_));
@@ -582,7 +582,7 @@ AssertionResult FakeUpstream::waitForHttpConnection(Event::Dispatcher& client_di
 
     // As noted in createNetworkFilterChain, HTTP3 FakeHttpConnections are not
     // lazily created, so HTTP3 needs a different wait path here.
-    if (http_type_ == FakeHttpConnection::Type::HTTP3) {
+    if (http_type_ == Http::CodecType::HTTP3) {
       if (quic_connections_.empty() &&
           !waitForWithDispatcherRun(
               time_system_, lock_,
@@ -691,7 +691,7 @@ SharedConnectionWrapper& FakeUpstream::consumeConnection() {
   connection_wrapper->setParented();
   connection_wrapper->moveBetweenLists(new_connections_, consumed_connections_);
   if (read_disable_on_new_connection_ && connection_wrapper->connected() &&
-      http_type_ != FakeHttpConnection::Type::HTTP3) {
+      http_type_ != Http::CodecType::HTTP3) {
     // Re-enable read and early close detection.
     auto& connection = connection_wrapper->connection();
     connection.detectEarlyCloseWhenReadDisabled(true);

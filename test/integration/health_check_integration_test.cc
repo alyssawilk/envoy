@@ -19,8 +19,8 @@ class HealthCheckIntegrationTestBase : public HttpIntegrationTest {
 public:
   HealthCheckIntegrationTestBase(
       Network::Address::IpVersion ip_version,
-      FakeHttpConnection::Type upstream_protocol = FakeHttpConnection::Type::HTTP2)
-      : HttpIntegrationTest(Http::CodecClient::Type::HTTP2, ip_version,
+      Http::CodecType upstream_protocol = FakeHttpConnection::Type::HTTP2)
+      : HttpIntegrationTest(Http::CodecType::HTTP2, ip_version,
                             ConfigHelper::discoveredClustersBootstrap("GRPC")),
         ip_version_(ip_version), upstream_protocol_(upstream_protocol) {}
 
@@ -48,8 +48,8 @@ public:
     // BaseIntegrationTest::createUpstreams() (which is part of initialize()).
     // Make sure this number matches the size of the 'clusters' repeated field in the bootstrap
     // config that you use!
-    setUpstreamCount(1);                                  // the CDS cluster
-    setUpstreamProtocol(FakeHttpConnection::Type::HTTP2); // CDS uses gRPC uses HTTP2.
+    setUpstreamCount(1);                         // the CDS cluster
+    setUpstreamProtocol(Http::CodecType::HTTP2); // CDS uses gRPC uses HTTP2.
 
     // HttpIntegrationTest::initialize() does many things:
     // 1) It appends to fake_upstreams_ as many as you asked for via setUpstreamCount().
@@ -126,12 +126,12 @@ public:
   static constexpr size_t clusters_num_ = 2;
   std::array<ClusterData, clusters_num_> clusters_{{{"cluster_1"}, {"cluster_2"}}};
   Network::Address::IpVersion ip_version_;
-  FakeHttpConnection::Type upstream_protocol_;
+  Http::CodecType upstream_protocol_;
 };
 
 struct HttpHealthCheckIntegrationTestParams {
   Network::Address::IpVersion ip_version;
-  FakeHttpConnection::Type upstream_protocol;
+  Http::CodecType upstream_protocol;
 };
 
 class HttpHealthCheckIntegrationTestBase
@@ -148,8 +148,7 @@ public:
     std::vector<HttpHealthCheckIntegrationTestParams> ret;
 
     for (auto ip_version : TestEnvironment::getIpVersionsForTest()) {
-      for (auto upstream_protocol :
-           {FakeHttpConnection::Type::HTTP1, FakeHttpConnection::Type::HTTP2}) {
+      for (auto upstream_protocol : {Http::CodecType::HTTP1, FakeHttpConnection::Type::HTTP2}) {
         ret.push_back(HttpHealthCheckIntegrationTestParams{ip_version, upstream_protocol});
       }
     }
@@ -160,8 +159,8 @@ public:
       const ::testing::TestParamInfo<HttpHealthCheckIntegrationTestParams>& params) {
     return absl::StrCat(
         (params.param.ip_version == Network::Address::IpVersion::v4 ? "IPv4_" : "IPv6_"),
-        (params.param.upstream_protocol == FakeHttpConnection::Type::HTTP2 ? "Http2Upstream"
-                                                                           : "HttpUpstream"));
+        (params.param.upstream_protocol == Http::CodecType::HTTP2 ? "Http2Upstream"
+                                                                  : "HttpUpstream"));
   }
 
   void TearDown() override {
@@ -173,9 +172,8 @@ public:
   // check probe to be received.
   void initHttpHealthCheck(uint32_t cluster_idx) {
     const envoy::type::v3::CodecClientType codec_client_type =
-        (FakeHttpConnection::Type::HTTP1 == upstream_protocol_)
-            ? envoy::type::v3::CodecClientType::HTTP1
-            : envoy::type::v3::CodecClientType::HTTP2;
+        (Http::CodecType::HTTP1 == upstream_protocol_) ? envoy::type::v3::CodecClientType::HTTP1
+                                                       : envoy::type::v3::CodecClientType::HTTP2;
 
     auto& cluster_data = clusters_[cluster_idx];
     auto* health_check = addHealthCheck(cluster_data.cluster_);
@@ -315,7 +313,7 @@ TEST_P(HttpHealthCheckIntegrationTest, SingleEndpointGoAway) {
   initialize();
 
   // GOAWAY doesn't exist in HTTP1.
-  if (upstream_protocol_ == FakeHttpConnection::Type::HTTP1) {
+  if (upstream_protocol_ == Http::CodecType::HTTP1) {
     return;
   }
 
@@ -377,7 +375,7 @@ TEST_P(RealTimeHttpHealthCheckIntegrationTest, SingleEndpointGoAwayErroSingleEnd
   initialize();
 
   // GOAWAY doesn't exist in HTTP1.
-  if (upstream_protocol_ == FakeHttpConnection::Type::HTTP1) {
+  if (upstream_protocol_ == Http::CodecType::HTTP1) {
     return;
   }
 

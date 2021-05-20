@@ -55,7 +55,9 @@ public:
   /**
    * Type of HTTP codec to use.
    */
-  enum class Type { HTTP1, HTTP2, HTTP3 };
+  // This is a legacy alias.
+  // TODO(alyssawilk) clean up use in Envoy.
+  using Type = Envoy::Http::CodecType;
 
   ~CodecClient() override;
 

@@ -413,7 +413,8 @@ protected:
  */
 class FakeHttpConnection : public Http::ServerConnectionCallbacks, public FakeConnectionBase {
 public:
-  enum class Type { HTTP1, HTTP2, HTTP3 };
+  // This is a legacy alias.
+  using Type = Envoy::Http::CodecType;
   static absl::string_view typeToString(Type type) {
     switch (type) {
     case Type::HTTP1:
@@ -559,7 +560,7 @@ struct FakeUpstreamConfig {
   }
 
   Event::TestTimeSystem& time_system_;
-  FakeHttpConnection::Type upstream_protocol_{FakeHttpConnection::Type::HTTP1};
+  Http::CodecType upstream_protocol_{FakeHttpConnection::Type::HTTP1};
   bool enable_half_close_{};
   absl::optional<UdpConfig> udp_fake_upstream_;
   envoy::config::core::v3::Http2ProtocolOptions http2_options_;
@@ -593,7 +594,7 @@ public:
                Network::Address::IpVersion version, const FakeUpstreamConfig& config);
   ~FakeUpstream() override;
 
-  FakeHttpConnection::Type httpType() { return http_type_; }
+  Http::CodecType httpType() { return http_type_; }
 
   // Returns the new connection via the connection argument.
   ABSL_MUST_USE_RESULT
@@ -678,7 +679,7 @@ public:
 
 protected:
   Stats::IsolatedStoreImpl stats_store_;
-  const FakeHttpConnection::Type http_type_;
+  const Http::CodecType http_type_;
 
 private:
   FakeUpstream(Network::TransportSocketFactoryPtr&& transport_socket_factory,

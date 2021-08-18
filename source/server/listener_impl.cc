@@ -32,7 +32,9 @@
 
 #ifdef ENVOY_ENABLE_QUIC
 #include "source/common/quic/active_quic_listener.h"
+#if defined(__linux__)
 #include "source/common/quic/udp_gso_batch_writer.h"
+#endif
 #endif
 
 namespace Envoy {

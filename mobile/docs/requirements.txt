@@ -818,9 +818,9 @@ snowballstemmer==2.2.0 \
     # via
     #   -r requirements.in
     #   sphinx
-sphinx==7.1.2 \
-    --hash=sha256:780f4d32f1d7d1126576e0e5ecc19dc32ab76cd24e950228dcf7b1f6d3d9e22f \
-    --hash=sha256:d170a81825b2fcacb6dfd5a0d7f578a053e45d3f2b153fecc948c37344eb4cbe
+sphinx==7.2.3 \
+    --hash=sha256:6379ea22c49955a44ed4e62bde8c94575e9544303cc0554eaa97099ae5853a3a \
+    --hash=sha256:ece68bb4d77b7dc090573825db45a6f9183e74098d1c21573485de250b1d1e3f
     # via
     #   -r requirements.in
     #   envoy-docs-sphinx-runner
@@ -828,6 +828,7 @@ sphinx==7.1.2 \
     #   sphinxcontrib-googleanalytics
     #   sphinxcontrib-httpdomain
     #   sphinxcontrib-jquery
+    #   sphinxcontrib-serializinghtml
     #   sphinxext-rediraffe
 sphinx-copybutton==0.5.2 \
     --hash=sha256:4cf17c82fb9646d1bc9ca92ac280813a3b605d8c421225fd9913154103ee1fbd \
@@ -881,9 +882,9 @@ sphinxcontrib-qthelp==1.0.3 \
     # via
     #   -r requirements.in
     #   sphinx
-sphinxcontrib-serializinghtml==1.1.5 \
-    --hash=sha256:352a9a00ae864471d3a7ead8d7d79f5fc0b57e8b3f95e9867eb9eb28999b92fd \
-    --hash=sha256:aa5f6de5dfdf809ef505c4895e51ef5c9eac17d0f287933eb49ec495280b6952
+sphinxcontrib-serializinghtml==1.1.9 \
+    --hash=sha256:0c64ff898339e1fac29abd2bf5f11078f3ec413cfe9c046d3120d7ca65530b54 \
+    --hash=sha256:9b36e503703ff04f20e9675771df105e58aa029cfcbc23b8ed716019b7416ae1
     # via
     #   -r requirements.in
     #   envoy-docs-sphinx-runner

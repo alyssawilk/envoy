@@ -73,7 +73,7 @@ jobs:
         cd mobile
         ./ci/mac_ci_setup.sh --android
       name: 'Install dependencies'
-    - uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd
+    - uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4
       name: 'Start emulator'
       with:
         timeout_minutes: 10
@@ -126,7 +126,7 @@ jobs:
       run: |
         cd mobile
         ./ci/mac_ci_setup.sh --android
-    - uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd
+    - uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4
       name: 'Start emulator'
       with:
         timeout_minutes: 10
@@ -179,7 +179,7 @@ jobs:
       run: |
         cd mobile
         ./ci/mac_ci_setup.sh --android
-    - uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd
+    - uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4
       name: 'Start emulator'
       with:
         timeout_minutes: 10
@@ -232,7 +232,7 @@ jobs:
       run: |
         cd mobile
         ./ci/mac_ci_setup.sh --android
-    - uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd
+    - uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4
       name: 'Start emulator'
       with:
         timeout_minutes: 10

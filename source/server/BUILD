@@ -436,7 +436,6 @@ envoy_cc_library(
         "//source/common/upstream:cluster_manager_lib",
         "//source/common/upstream:health_discovery_service_lib",
         "//source/common/version:version_lib",
-        "//source/server:overload_manager_lib",
         "//source/server/admin:admin_lib",
         "@envoy_api//envoy/admin/v3:pkg_cc_proto",
         "@envoy_api//envoy/config/bootstrap/v3:pkg_cc_proto",
@@ -450,6 +449,7 @@ envoy_cc_library(
     deps = [
         ":server_base_lib",
         "//source/common/memory:heap_shrinker_lib",
+        "//source/server:overload_manager_lib",
     ],
 )
 

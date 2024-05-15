@@ -131,7 +131,6 @@ paths:
     - source/common/router/scoped_rds.cc
     - source/common/router/config_impl.cc
     - source/common/router/scoped_config_impl.cc
-    - source/common/router/header_parser.cc
     - source/common/filesystem/posix/directory_iterator_impl.cc
     - source/common/filesystem/inotify/watcher_impl.cc
     - source/common/filesystem/kqueue/watcher_impl.cc
@@ -168,6 +167,8 @@ paths:
     - source/common/config/watched_directory.cc
     - source/server/drain_manager_impl.cc
     - source/common/router/rds_impl.cc
+    - source/common/grpc/async_client_impl.cc
+    - source/common/grpc/google_async_client_impl.cc
 
   # Only one C++ file should instantiate grpc_init
   grpc_init:

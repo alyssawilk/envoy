@@ -68,9 +68,9 @@ RedirectPolicy::RedirectPolicy(
                              static_cast<::Envoy::Http::Code>(config.status_code().value()))
                        : absl::optional<::Envoy::Http::Code>{}},
       response_header_parser_(
-          Envoy::Router::HeaderParser::configure(config.response_headers_to_add())),
+          THROW_OR_RETURN_VALUE(Envoy::Router::HeaderParser::configure(config.response_headers_to_add(), Router::HeaderParserPtr))),
       request_header_parser_(
-          Envoy::Router::HeaderParser::configure(config.request_headers_to_add())),
+          THROW_OR_RETURN_VALUE(Envoy::Router::HeaderParser::configure(config.request_headers_to_add()), Router::HeaderParserPtr),
       modify_request_headers_action_(createModifyRequestHeadersAction(config, context)) {
   // Ensure that exactly one of uri_ or redirect_action_ is specified.
   ASSERT((uri_ || redirect_action_) && !(uri_ && redirect_action_));

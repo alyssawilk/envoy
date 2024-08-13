@@ -71,6 +71,7 @@ void LibeventScheduler::registerOnPrepareCallback(OnPrepareCallback&& callback) 
 }
 
 void LibeventScheduler::initializeStats(DispatcherStats* stats) {
+  std::cerr << "initialize stats\n";
   stats_ = stats;
   // These are thread safe.
   evwatch_prepare_new(libevent_.get(), &onPrepareForStats, this);
@@ -105,6 +106,7 @@ void LibeventScheduler::onPrepareForStats(evwatch*, const evwatch_prepare_cb_inf
 }
 
 void LibeventScheduler::onCheckForStats(evwatch*, const evwatch_check_cb_info*, void* arg) {
+  std::cerr << "On Check for stats\n";
   // `self` is `this`, passed in from evwatch_check_new.
   auto self = static_cast<LibeventScheduler*>(arg);
 

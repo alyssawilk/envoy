@@ -386,11 +386,17 @@ protected:
 // TODO(mergeconflict): We also need integration testing to validate that the expected histograms
 // are written when `enable_dispatcher_stats` is true. See issue #6582.
 TEST_F(DispatcherImplTest, InitializeStats) {
+  DispatcherPtr dispatcher = api_->allocateDispatcher("test_thread");
   EXPECT_CALL(store_,
               histogram("test.dispatcher.loop_duration_us", Stats::Histogram::Unit::Microseconds));
   EXPECT_CALL(store_,
               histogram("test.dispatcher.poll_delay_us", Stats::Histogram::Unit::Microseconds));
-  dispatcher_->initializeStats(scope_, "test.");
+  dispatcher->initializeStats(scope_, "test.");
+
+  Event::TimerPtr timer = dispatcher->createTimer([&] { dispatcher->exit(); });
+  timer->enableTimer(std::chrono::seconds(10));
+
+  dispatcher->run(Dispatcher::RunType::Block);
 }
 
 TEST_F(DispatcherImplTest, Post) {

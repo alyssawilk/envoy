@@ -393,9 +393,26 @@ TEST_F(DispatcherImplTest, InitializeStats) {
               histogram("test.dispatcher.poll_delay_us", Stats::Histogram::Unit::Microseconds));
   dispatcher->initializeStats(scope_, "test.");
 
+  os_fd_t fd = Api::OsSysCallsSingleton::get().socket(AF_INET6, SOCK_DGRAM, 0).return_value_;
+  ASSERT_TRUE(SOCKET_VALID(fd));
+
+  ReadyWatcher watcher;
+  EXPECT_CALL(watcher, ready());
+
+  const FileTriggerType trigger = Event::PlatformDefaultTriggerType;
+  Event::FileEventPtr file_event = dispatcher->createFileEvent(
+      fd,
+      [&](uint32_t) {
+        watcher.ready();
+        return absl::OkStatus();
+      },
+      trigger, FileReadyType::Read);
+  file_event->activate(FileReadyType::Read);
+
   Event::TimerPtr timer = dispatcher->createTimer([&] { dispatcher->exit(); });
   timer->enableTimer(std::chrono::seconds(10));
 
+  std::cerr << "Running loop\n";
   dispatcher->run(Dispatcher::RunType::Block);
 }
 

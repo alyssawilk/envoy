@@ -291,7 +291,7 @@ HttpConnectionManagerFilterConfigFactory::createFilterFactoryFromProtoAndHopByHo
     Server::Configuration::FactoryContext& context, bool clear_hop_by_hop_headers) {
   Utility::Singletons singletons = Utility::createSingletons(context);
 
-  auto filter_config = THROW_OR_RETURN_VALUE(
+  auto filter_config = LEGACY_THROW_OR_RETURN_VALUE(
       Utility::createConfig(proto_config, context, *singletons.date_provider_,
                             *singletons.route_config_provider_manager_,
                             singletons.scoped_routes_config_provider_manager_.get(),
@@ -875,7 +875,7 @@ HttpConnectionManagerFactory::createHttpConnectionManagerFactoryFromProto(
     Server::Configuration::FactoryContext& context, bool clear_hop_by_hop_headers) {
   Utility::Singletons singletons = Utility::createSingletons(context);
 
-  auto filter_config = THROW_OR_RETURN_VALUE(
+  auto filter_config = LEGACY_THROW_OR_RETURN_VALUE(
       Utility::createConfig(proto_config, context, *singletons.date_provider_,
                             *singletons.route_config_provider_manager_,
                             singletons.scoped_routes_config_provider_manager_.get(),

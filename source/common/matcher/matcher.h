@@ -241,7 +241,7 @@ private:
       auto input_matcher = createInputMatcher(field_predicate.single_predicate());
 
       return [data_input, input_matcher]() {
-        return THROW_OR_RETURN_VALUE(
+        return LEGACY_THROW_OR_RETURN_VALUE(
             SingleFieldMatcher<DataType>::create(data_input(), input_matcher()),
             std::unique_ptr<SingleFieldMatcher<DataType>>);
       };
@@ -314,7 +314,7 @@ private:
     return [match_children, data_input, on_no_match, creation_function]() {
       auto matcher_or_error = creation_function(
           data_input(), on_no_match ? absl::make_optional((*on_no_match)()) : absl::nullopt);
-      THROW_IF_NOT_OK(matcher_or_error.status());
+      LEGACY_THROW_IF_NOT_OK(matcher_or_error.status());
       auto multimap_matcher = std::move(*matcher_or_error);
       for (const auto& children : match_children) {
         multimap_matcher->addChild(children.first, children.second());

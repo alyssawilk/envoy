@@ -32,7 +32,7 @@ SdsApi::SdsApi(envoy::config::core::v3::ConfigSource sds_config, absl::string_vi
                                               time_source_.systemTime()} {
   const auto resource_name = getResourceName();
   // This has to happen here (rather than in initialize()) as it can throw exceptions.
-  subscription_ = THROW_OR_RETURN_VALUE(
+  subscription_ = LEGACY_THROW_OR_RETURN_VALUE(
       subscription_factory_.subscriptionFromConfigSource(
           sds_config_, Grpc::Common::typeUrl(resource_name), *scope_, *this, resource_decoder_, {}),
       Config::SubscriptionPtr);
@@ -71,7 +71,7 @@ void SdsApi::onWatchUpdate() {
     const uint64_t new_hash = next_hash;
     if (new_hash != files_hash_) {
       resolveSecret(files);
-      THROW_IF_NOT_OK(update_callback_manager_.runCallbacks());
+      LEGACY_THROW_IF_NOT_OK(update_callback_manager_.runCallbacks());
       files_hash_ = new_hash;
     }
   }
@@ -105,7 +105,7 @@ absl::Status SdsApi::onConfigUpdate(const std::vector<Config::DecodedResourceRef
     const auto files = loadFiles();
     files_hash_ = getHashForFiles(files);
     resolveSecret(files);
-    THROW_IF_NOT_OK(update_callback_manager_.runCallbacks());
+    LEGACY_THROW_IF_NOT_OK(update_callback_manager_.runCallbacks());
 
     auto* watched_directory = getWatchedDirectory();
     // Either we have a watched path and can defer the watch monitoring to a
@@ -210,7 +210,7 @@ SdsApi::FileContentMap SdsApi::loadFiles() {
   FileContentMap files;
   for (auto const& filename : getDataSourceFilenames()) {
     auto file_or_error = api_.fileSystem().fileReadToEnd(filename);
-    THROW_IF_NOT_OK_REF(file_or_error.status());
+    LEGACY_THROW_IF_NOT_OK_REF(file_or_error.status());
     files[filename] = file_or_error.value();
   }
   return files;
@@ -231,7 +231,7 @@ TlsCertificateSdsApiSharedPtr TlsCertificateSdsApi::create(
   // We need to do this early as we invoke the subscription factory during initialization, which
   // is too late to throw.
   auto& server_context = secret_provider_context.serverFactoryContext();
-  THROW_IF_NOT_OK(
+  LEGACY_THROW_IF_NOT_OK(
       Config::Utility::checkLocalInfo("TlsCertificateSdsApi", server_context.localInfo()));
   return std::make_shared<TlsCertificateSdsApi>(
       sds_config, sds_config_name, secret_provider_context.clusterManager().subscriptionFactory(),
@@ -243,7 +243,7 @@ TlsCertificateSdsApiSharedPtr TlsCertificateSdsApi::create(
 ABSL_MUST_USE_RESULT Common::CallbackHandlePtr
 TlsCertificateSdsApi::addUpdateCallback(std::function<absl::Status()> callback) {
   if (secret()) {
-    THROW_IF_NOT_OK(callback());
+    LEGACY_THROW_IF_NOT_OK(callback());
   }
   return update_callback_manager_.add(callback);
 }
@@ -295,7 +295,7 @@ CertificateValidationContextSdsApiSharedPtr CertificateValidationContextSdsApi::
   // We need to do this early as we invoke the subscription factory during initialization, which
   // is too late to throw.
   auto& server_context = secret_provider_context.serverFactoryContext();
-  THROW_IF_NOT_OK(Config::Utility::checkLocalInfo("CertificateValidationContextSdsApi",
+  LEGACY_THROW_IF_NOT_OK(Config::Utility::checkLocalInfo("CertificateValidationContextSdsApi",
                                                   server_context.localInfo()));
   return std::make_shared<CertificateValidationContextSdsApi>(
       sds_config, sds_config_name, secret_provider_context.clusterManager().subscriptionFactory(),
@@ -307,14 +307,14 @@ CertificateValidationContextSdsApiSharedPtr CertificateValidationContextSdsApi::
 ABSL_MUST_USE_RESULT Common::CallbackHandlePtr
 CertificateValidationContextSdsApi::addUpdateCallback(std::function<absl::Status()> callback) {
   if (secret()) {
-    THROW_IF_NOT_OK(callback());
+    LEGACY_THROW_IF_NOT_OK(callback());
   }
   return update_callback_manager_.add(callback);
 }
 
 void CertificateValidationContextSdsApi::validateConfig(
     const envoy::extensions::transport_sockets::tls::v3::Secret& secret) {
-  THROW_IF_NOT_OK(validation_callback_manager_.runCallbacks(secret.validation_context()));
+  LEGACY_THROW_IF_NOT_OK(validation_callback_manager_.runCallbacks(secret.validation_context()));
 }
 
 void CertificateValidationContextSdsApi::setSecret(
@@ -367,7 +367,7 @@ TlsSessionTicketKeysSdsApiSharedPtr TlsSessionTicketKeysSdsApi::create(
   // We need to do this early as we invoke the subscription factory during initialization, which
   // is too late to throw.
   auto& server_context = secret_provider_context.serverFactoryContext();
-  THROW_IF_NOT_OK(
+  LEGACY_THROW_IF_NOT_OK(
       Config::Utility::checkLocalInfo("TlsSessionTicketKeysSdsApi", server_context.localInfo()));
   return std::make_shared<TlsSessionTicketKeysSdsApi>(
       sds_config, sds_config_name, secret_provider_context.clusterManager().subscriptionFactory(),
@@ -379,7 +379,7 @@ TlsSessionTicketKeysSdsApiSharedPtr TlsSessionTicketKeysSdsApi::create(
 ABSL_MUST_USE_RESULT Common::CallbackHandlePtr
 TlsSessionTicketKeysSdsApi::addUpdateCallback(std::function<absl::Status()> callback) {
   if (secret()) {
-    THROW_IF_NOT_OK(callback());
+    LEGACY_THROW_IF_NOT_OK(callback());
   }
   return update_callback_manager_.add(callback);
 }
@@ -393,7 +393,7 @@ ABSL_MUST_USE_RESULT Common::CallbackHandlePtr TlsSessionTicketKeysSdsApi::addVa
 
 void TlsSessionTicketKeysSdsApi::validateConfig(
     const envoy::extensions::transport_sockets::tls::v3::Secret& secret) {
-  THROW_IF_NOT_OK(validation_callback_manager_.runCallbacks(secret.session_ticket_keys()));
+  LEGACY_THROW_IF_NOT_OK(validation_callback_manager_.runCallbacks(secret.session_ticket_keys()));
 }
 
 std::vector<std::string> TlsSessionTicketKeysSdsApi::getDataSourceFilenames() { return {}; }
@@ -405,7 +405,7 @@ GenericSecretSdsApiSharedPtr GenericSecretSdsApi::create(
   // We need to do this early as we invoke the subscription factory during initialization, which
   // is too late to throw.
   auto& server_context = secret_provider_context.serverFactoryContext();
-  THROW_IF_NOT_OK(
+  LEGACY_THROW_IF_NOT_OK(
       Config::Utility::checkLocalInfo("GenericSecretSdsApi", server_context.localInfo()));
   return std::make_shared<GenericSecretSdsApi>(
       sds_config, sds_config_name, secret_provider_context.clusterManager().subscriptionFactory(),
@@ -416,7 +416,7 @@ GenericSecretSdsApiSharedPtr GenericSecretSdsApi::create(
 
 void GenericSecretSdsApi::validateConfig(
     const envoy::extensions::transport_sockets::tls::v3::Secret& secret) {
-  THROW_IF_NOT_OK(validation_callback_manager_.runCallbacks(secret.generic_secret()));
+  LEGACY_THROW_IF_NOT_OK(validation_callback_manager_.runCallbacks(secret.generic_secret()));
 }
 
 std::vector<std::string> GenericSecretSdsApi::getDataSourceFilenames() { return {}; }

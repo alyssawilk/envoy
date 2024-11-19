@@ -386,7 +386,7 @@ void InstanceBase::initialize(Network::Address::InstanceConstSharedPtr local_add
                               ComponentFactory& component_factory) {
   std::function set_up_logger = [&] {
     TRY_ASSERT_MAIN_THREAD {
-      file_logger_ = THROW_OR_RETURN_VALUE(
+      file_logger_ = LEGACY_THROW_OR_RETURN_VALUE(
           Logger::FileSinkDelegate::create(options_.logPath(), access_log_manager_,
                                            Logger::Registry::getSink()),
           std::unique_ptr<Logger::FileSinkDelegate>);
@@ -404,7 +404,7 @@ void InstanceBase::initialize(Network::Address::InstanceConstSharedPtr local_add
     }
     restarter_.initialize(*dispatcher_, *this);
     drain_manager_ = component_factory.createDrainManager(*this);
-    THROW_IF_NOT_OK(initializeOrThrow(std::move(local_address), component_factory));
+    LEGACY_THROW_IF_NOT_OK(initializeOrThrow(std::move(local_address), component_factory));
   }
   END_TRY
   MULTI_CATCH(
@@ -773,7 +773,7 @@ absl::Status InstanceBase::initializeOrThrow(Network::Address::InstanceConstShar
     std::unique_ptr<xds::core::v3::ResourceLocator> lds_resources_locator;
     if (!bootstrap_.dynamic_resources().lds_resources_locator().empty()) {
       lds_resources_locator = std::make_unique<xds::core::v3::ResourceLocator>(
-          THROW_OR_RETURN_VALUE(Config::XdsResourceIdentifier::decodeUrl(
+          LEGACY_THROW_OR_RETURN_VALUE(Config::XdsResourceIdentifier::decodeUrl(
                                     bootstrap_.dynamic_resources().lds_resources_locator()),
                                 xds::core::v3::ResourceLocator));
     }
@@ -820,7 +820,7 @@ void InstanceBase::onRuntimeReady() {
   // Begin initializing secondary clusters after RTDS configuration has been applied.
   // Initializing can throw exceptions, so catch these.
   TRY_ASSERT_MAIN_THREAD {
-    THROW_IF_NOT_OK(clusterManager().initializeSecondaryClusters(bootstrap_));
+    LEGACY_THROW_IF_NOT_OK(clusterManager().initializeSecondaryClusters(bootstrap_));
   }
   END_TRY
   CATCH(const EnvoyException& e, {
@@ -834,11 +834,11 @@ void InstanceBase::onRuntimeReady() {
         *config_.clusterManager(), thread_local_, server_contexts_, grpc_context_.statNames(),
         bootstrap_.grpc_async_client_manager_config());
     TRY_ASSERT_MAIN_THREAD {
-      THROW_IF_NOT_OK(Config::Utility::checkTransportVersion(hds_config));
+      LEGACY_THROW_IF_NOT_OK(Config::Utility::checkTransportVersion(hds_config));
       // HDS does not support xDS-Failover.
       auto factory_or_error = Config::Utility::factoryForGrpcApiConfigSource(
           *async_client_manager_, hds_config, *stats_store_.rootScope(), false, 0);
-      THROW_IF_NOT_OK_REF(factory_or_error.status());
+      LEGACY_THROW_IF_NOT_OK_REF(factory_or_error.status());
       hds_delegate_ =
           maybeCreateHdsDelegate(serverFactoryContext(), *stats_store_.rootScope(),
                                  factory_or_error.value()->createUncachedRawAsyncClient(),
@@ -864,7 +864,7 @@ void InstanceBase::onRuntimeReady() {
 
 void InstanceBase::startWorkers() {
   // The callback will be called after workers are started.
-  THROW_IF_NOT_OK(
+  LEGACY_THROW_IF_NOT_OK(
       listener_manager_->startWorkers(makeOptRefFromPtr(worker_guard_dog_.get()), [this]() {
         if (isShutdown()) {
           return;
@@ -891,7 +891,7 @@ Runtime::LoaderPtr InstanceUtil::createRuntime(Instance& server,
       server.dispatcher(), server.threadLocal(), config.runtime(), server.localInfo(),
       server.stats(), server.api().randomGenerator(),
       server.messageValidationContext().dynamicValidationVisitor(), server.api());
-  THROW_IF_NOT_OK_REF(loader.status());
+  LEGACY_THROW_IF_NOT_OK(loader.status());
   return std::move(loader.value());
 }
 
@@ -1145,7 +1145,7 @@ Network::DnsResolverSharedPtr InstanceBase::getOrCreateDnsResolver() {
     envoy::config::core::v3::TypedExtensionConfig typed_dns_resolver_config;
     Network::DnsResolverFactory& dns_resolver_factory =
         Network::createDnsResolverFactoryFromProto(bootstrap_, typed_dns_resolver_config);
-    dns_resolver_ = THROW_OR_RETURN_VALUE(
+    dns_resolver_ = LEGACY_THROW_OR_RETURN_VALUE(
         dns_resolver_factory.createDnsResolver(dispatcher(), api(), typed_dns_resolver_config),
         Network::DnsResolverSharedPtr);
   }

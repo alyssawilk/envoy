@@ -108,7 +108,7 @@ Common::CallbackHandlePtr DrainManagerImpl::addOnDrainCloseCb(DrainCloseCb cb) c
         }
       }
     }
-    THROW_IF_NOT_OK(cb(drain_delay));
+    LEGACY_THROW_IF_NOT_OK(cb(drain_delay));
     return nullptr;
   }
 
@@ -187,7 +187,7 @@ void DrainManagerImpl::startDrainSequence(std::function<void()> drain_complete_c
 
   uint32_t step_count = 0;
   size_t num_cbs = cbs_.size();
-  THROW_IF_NOT_OK(cbs_.runCallbacksWith([&]() {
+  LEGACY_THROW_IF_NOT_OK(cbs_.runCallbacksWith([&]() {
     // switch to floating-point math to avoid issues with integer division
     std::chrono::milliseconds delay{static_cast<int64_t>(
         static_cast<double>(step_count) / 4 / num_cbs *

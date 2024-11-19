@@ -160,8 +160,8 @@ void deprecatedFieldHelper(Runtime::Loader* runtime, bool proto_annotated_as_dep
       fmt::runtime(error),
       (runtime_overridden ? "runtime overrides to continue using now fatal-by-default " : ""));
 
-  THROW_IF_NOT_OK(validation_visitor.onDeprecatedField(
-      absl::StrCat("type ", message.GetTypeName(), " ", with_overridden), warn_only));
+  LEGACY_THROW_IF_NOT_OK(validation_visitor.onDeprecatedField(
+      "type " + message.GetTypeName() + " " + with_overridden, warn_only));
 }
 
 } // namespace
@@ -376,7 +376,7 @@ void MessageUtil::checkForUnexpectedFields(const Protobuf::Message& message,
                                  ? &validation_visitor.runtime().value().get()
                                  : nullptr;
   UnexpectedFieldProtoVisitor unexpected_field_visitor(validation_visitor, runtime);
-  THROW_IF_NOT_OK(
+  LEGACY_THROW_IF_NOT_OK(
       ProtobufMessage::traverseMessage(unexpected_field_visitor, message, recurse_into_any));
 }
 
@@ -410,7 +410,7 @@ public:
 void MessageUtil::validateDurationFields(const Protobuf::Message& message, bool recurse_into_any) {
   if (Runtime::runtimeFeatureEnabled("envoy.reloadable_features.strict_duration_validation")) {
     DurationFieldProtoVisitor duration_field_visitor;
-    THROW_IF_NOT_OK(
+    LEGACY_THROW_IF_NOT_OK(
         ProtobufMessage::traverseMessage(duration_field_visitor, message, recurse_into_any));
   }
 }
@@ -443,7 +443,7 @@ public:
 
 void MessageUtil::recursivePgvCheck(const Protobuf::Message& message) {
   PgvCheckVisitor visitor;
-  THROW_IF_NOT_OK(ProtobufMessage::traverseMessage(visitor, message, true));
+  LEGACY_THROW_IF_NOT_OK(ProtobufMessage::traverseMessage(visitor, message, true));
 }
 
 void MessageUtil::packFrom(ProtobufWkt::Any& any_message, const Protobuf::Message& message) {

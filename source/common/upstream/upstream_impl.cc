@@ -730,7 +730,7 @@ void HostSetImpl::updateHosts(PrioritySet::UpdateHostsParams&& update_hosts_para
                            hosts_per_locality_, excluded_hosts_per_locality_, locality_weights_,
                            overprovisioning_factor_, seed);
 
-  THROW_IF_NOT_OK(runUpdateCallbacks(hosts_added, hosts_removed));
+  LEGACY_THROW_IF_NOT_OK(runUpdateCallbacks(hosts_added, hosts_removed));
 }
 
 void HostSetImpl::rebuildLocalityScheduler(
@@ -901,7 +901,7 @@ void PrioritySetImpl::updateHosts(uint32_t priority, UpdateHostsParams&& update_
                     hosts_removed, seed, weighted_priority_health, overprovisioning_factor);
 
   if (!batch_update_) {
-    THROW_IF_NOT_OK(runUpdateCallbacks(hosts_added, hosts_removed));
+    LEGACY_THROW_IF_NOT_OK(runUpdateCallbacks(hosts_added, hosts_removed));
   }
 }
 
@@ -915,7 +915,7 @@ void PrioritySetImpl::batchHostUpdate(BatchUpdateCb& callback) {
   HostVector net_hosts_added = filterHosts(scope.all_hosts_added_, scope.all_hosts_removed_);
   HostVector net_hosts_removed = filterHosts(scope.all_hosts_removed_, scope.all_hosts_added_);
 
-  THROW_IF_NOT_OK(runUpdateCallbacks(net_hosts_added, net_hosts_removed));
+  LEGACY_THROW_IF_NOT_OK(runUpdateCallbacks(net_hosts_added, net_hosts_removed));
 }
 
 void PrioritySetImpl::BatchUpdateScope::updateHosts(
@@ -1154,9 +1154,9 @@ ClusterInfoImpl::ClusterInfoImpl(
           config.has_eds_cluster_config()
               ? std::make_unique<std::string>(config.eds_cluster_config().service_name())
               : nullptr),
-      extension_protocol_options_(THROW_OR_RETURN_VALUE(
+      extension_protocol_options_(LEGACY_THROW_OR_RETURN_VALUE(
           parseExtensionProtocolOptions(config, factory_context), ProtocolOptionsHashMap)),
-      http_protocol_options_(THROW_OR_RETURN_VALUE(
+      http_protocol_options_(LEGACY_THROW_OR_RETURN_VALUE(
           createOptions(config,
                         extensionProtocolOptionsTyped<HttpProtocolOptionsConfigImpl>(
                             "envoy.extensions.upstreams.http.v3.HttpProtocolOptions"),
@@ -1195,7 +1195,7 @@ ClusterInfoImpl::ClusterInfoImpl(
                          factory_context.clusterManager().clusterCircuitBreakersStatNames()),
       maintenance_mode_runtime_key_(absl::StrCat("upstream.maintenance_mode.", name_)),
       upstream_local_address_selector_(
-          THROW_OR_RETURN_VALUE(createUpstreamLocalAddressSelector(config, bind_config),
+          LEGACY_THROW_OR_RETURN_VALUE(createUpstreamLocalAddressSelector(config, bind_config),
                                 Envoy::Upstream::UpstreamLocalAddressSelectorConstSharedPtr)),
       upstream_config_(config.has_upstream_config()
                            ? std::make_unique<envoy::config::core::v3::TypedExtensionConfig>(
@@ -1964,10 +1964,10 @@ ClusterInfoImpl::ResourceManagers::ResourceManagers(
     const std::string& cluster_name, Stats::Scope& stats_scope,
     const ClusterCircuitBreakersStatNames& circuit_breakers_stat_names)
     : circuit_breakers_stat_names_(circuit_breakers_stat_names) {
-  managers_[enumToInt(ResourcePriority::Default)] = THROW_OR_RETURN_VALUE(
+  managers_[enumToInt(ResourcePriority::Default)] = LEGACY_THROW_OR_RETURN_VALUE(
       load(config, runtime, cluster_name, stats_scope, envoy::config::core::v3::DEFAULT),
       ResourceManagerImplPtr);
-  managers_[enumToInt(ResourcePriority::High)] = THROW_OR_RETURN_VALUE(
+  managers_[enumToInt(ResourcePriority::High)] = LEGACY_THROW_OR_RETURN_VALUE(
       load(config, runtime, cluster_name, stats_scope, envoy::config::core::v3::HIGH),
       ResourceManagerImplPtr);
 }
@@ -2179,7 +2179,7 @@ void PriorityStateManager::registerHostForPriority(
       locality_lb_endpoint.has_metadata()
           ? parent_.constMetadataSharedPool()->getObject(locality_lb_endpoint.metadata())
           : nullptr;
-  const auto host = std::shared_ptr<HostImpl>(THROW_OR_RETURN_VALUE(
+  const auto host = std::shared_ptr<HostImpl>(LEGACY_THROW_OR_RETURN_VALUE(
       HostImpl::create(parent_.info(), hostname, address, endpoint_metadata, locality_metadata,
                        lb_endpoint.load_balancing_weight().value(), locality_lb_endpoint.locality(),
                        lb_endpoint.endpoint().health_check_config(),
@@ -2576,7 +2576,7 @@ Network::Address::InstanceConstSharedPtr resolveHealthCheckAddress(
   const auto& port_value = health_check_config.port_value();
   if (health_check_config.has_address()) {
     auto address_or_error = Network::Address::resolveProtoAddress(health_check_config.address());
-    THROW_IF_NOT_OK_REF(address_or_error.status());
+    LEGACY_THROW_IF_NOT_OK_REF(address_or_error.status());
     auto address = address_or_error.value();
     health_check_address =
         port_value == 0 ? address : Network::Utility::getAddressWithPort(*address, port_value);

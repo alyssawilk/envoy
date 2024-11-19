@@ -100,7 +100,7 @@ public:
       if (matcher.ignore_case()) {
         ExceptionUtil::throwEnvoyException("ignore_case has no effect for safe_regex.");
       }
-      regex_ = THROW_OR_RETURN_VALUE(
+      regex_ = LEGACY_THROW_OR_RETURN_VALUE(
           Regex::Utility::parseRegex(matcher_.safe_regex(), context.regexEngine()),
           Regex::CompiledMatcherPtr);
     } else if (matcher.match_pattern_case() == StringMatcherType::MatchPatternCase::kContains) {

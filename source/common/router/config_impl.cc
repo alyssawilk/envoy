@@ -230,7 +230,7 @@ createRedirectConfig(const envoy::config::route::v3::Route& route, Regex::Engine
       route.redirect().prefix_rewrite(),
       route.redirect().has_regex_rewrite() ? route.redirect().regex_rewrite().substitution() : "",
       route.redirect().has_regex_rewrite()
-          ? THROW_OR_RETURN_VALUE(Regex::Utility::parseRegex(
+          ? LEGACY_THROW_OR_RETURN_VALUE(Regex::Utility::parseRegex(
                                       route.redirect().regex_rewrite().pattern(), regex_engine),
                                   Regex::CompiledMatcherPtr)
           : nullptr,
@@ -550,9 +550,9 @@ RouteEntryImplBase::RouteEntryImplBase(const CommonVirtualHostSharedPtr& vhost,
                                        absl::Status& creation_status)
     : prefix_rewrite_(route.route().prefix_rewrite()),
       path_matcher_(
-          THROW_OR_RETURN_VALUE(buildPathMatcher(route, validator), PathMatcherSharedPtr)),
+          LEGACY_THROW_OR_RETURN_VALUE(buildPathMatcher(route, validator), PathMatcherSharedPtr)),
       path_rewriter_(
-          THROW_OR_RETURN_VALUE(buildPathRewriter(route, validator), PathRewriterSharedPtr)),
+          LEGACY_THROW_OR_RETURN_VALUE(buildPathRewriter(route, validator), PathRewriterSharedPtr)),
       host_rewrite_(route.route().host_rewrite_literal()), vhost_(vhost),
       auto_host_rewrite_header_(!route.route().host_rewrite_header().empty()
                                     ? absl::optional<Http::LowerCaseString>(Http::LowerCaseString(
@@ -560,7 +560,7 @@ RouteEntryImplBase::RouteEntryImplBase(const CommonVirtualHostSharedPtr& vhost,
                                     : absl::nullopt),
       host_rewrite_path_regex_(
           route.route().has_host_rewrite_path_regex()
-              ? THROW_OR_RETURN_VALUE(
+              ? LEGACY_THROW_OR_RETURN_VALUE(
                     Regex::Utility::parseRegex(route.route().host_rewrite_path_regex().pattern(),
                                                factory_context.regexEngine()),
                     Regex::CompiledMatcherPtr)
@@ -579,7 +579,7 @@ RouteEntryImplBase::RouteEntryImplBase(const CommonVirtualHostSharedPtr& vhost,
                            : nullptr),
       hedge_policy_(buildHedgePolicy(vhost->hedgePolicy(), route.route())),
       internal_redirect_policy_(
-          THROW_OR_RETURN_VALUE(buildInternalRedirectPolicy(route.route(), validator, route.name()),
+          LEGACY_THROW_OR_RETURN_VALUE(buildInternalRedirectPolicy(route.route(), validator, route.name()),
                                 std::unique_ptr<InternalRedirectPolicyImpl>)),
       config_headers_(
           Http::HeaderUtility::buildHeaderDataVector(route.match().headers(), factory_context)),
@@ -671,7 +671,7 @@ RouteEntryImplBase::RouteEntryImplBase(const CommonVirtualHostSharedPtr& vhost,
     std::vector<WeightedClusterEntrySharedPtr> weighted_clusters;
     weighted_clusters.reserve(route.route().weighted_clusters().clusters().size());
     for (const auto& cluster : route.route().weighted_clusters().clusters()) {
-      auto cluster_entry = THROW_OR_RETURN_VALUE(
+      auto cluster_entry = LEGACY_THROW_OR_RETURN_VALUE(
           WeightedClusterEntry::create(this, runtime_key_prefix + "." + cluster.name(),
                                        factory_context, validator, cluster),
           std::unique_ptr<WeightedClusterEntry>);
@@ -716,7 +716,7 @@ RouteEntryImplBase::RouteEntryImplBase(const CommonVirtualHostSharedPtr& vhost,
   }
 
   if (!route.route().hash_policy().empty()) {
-    hash_policy_ = THROW_OR_RETURN_VALUE(
+    hash_policy_ = LEGACY_THROW_OR_RETURN_VALUE(
         Http::HashPolicyImpl::create(route.route().hash_policy(), factory_context.regexEngine()),
         std::unique_ptr<Http::HashPolicyImpl>);
   }
@@ -796,7 +796,7 @@ RouteEntryImplBase::RouteEntryImplBase(const CommonVirtualHostSharedPtr& vhost,
 
   if (route.route().has_regex_rewrite()) {
     auto rewrite_spec = route.route().regex_rewrite();
-    regex_rewrite_ = THROW_OR_RETURN_VALUE(
+    regex_rewrite_ = LEGACY_THROW_OR_RETURN_VALUE(
         Regex::Utility::parseRegex(rewrite_spec.pattern(), factory_context.regexEngine()),
         Regex::CompiledMatcherPtr);
     regex_rewrite_substitution_ = rewrite_spec.substitution();
@@ -1566,20 +1566,20 @@ RouteEntryImplBase::WeightedClusterEntry::WeightedClusterEntry(
     const envoy::config::route::v3::WeightedCluster::ClusterWeight& cluster)
     : DynamicRouteEntry(parent, nullptr, cluster.name()), runtime_key_(runtime_key),
       cluster_weight_(PROTOBUF_GET_WRAPPED_REQUIRED(cluster, weight)),
-      per_filter_configs_(THROW_OR_RETURN_VALUE(
+      per_filter_configs_(LEGACY_THROW_OR_RETURN_VALUE(
           PerFilterConfigs::create(cluster.typed_per_filter_config(), factory_context, validator),
           std::unique_ptr<PerFilterConfigs>)),
       host_rewrite_(cluster.host_rewrite_literal()),
       cluster_header_name_(cluster.cluster_header()) {
   if (!cluster.request_headers_to_add().empty() || !cluster.request_headers_to_remove().empty()) {
     request_headers_parser_ =
-        THROW_OR_RETURN_VALUE(HeaderParser::configure(cluster.request_headers_to_add(),
+        LEGACY_THROW_OR_RETURN_VALUE(HeaderParser::configure(cluster.request_headers_to_add(),
                                                       cluster.request_headers_to_remove()),
                               Router::HeaderParserPtr);
   }
   if (!cluster.response_headers_to_add().empty() || !cluster.response_headers_to_remove().empty()) {
     response_headers_parser_ =
-        THROW_OR_RETURN_VALUE(HeaderParser::configure(cluster.response_headers_to_add(),
+        LEGACY_THROW_OR_RETURN_VALUE(HeaderParser::configure(cluster.response_headers_to_add(),
                                                       cluster.response_headers_to_remove()),
                               Router::HeaderParserPtr);
   }
@@ -1822,7 +1822,7 @@ CommonVirtualHostImpl::CommonVirtualHostImpl(
     : stat_name_storage_(virtual_host.name(), factory_context.scope().symbolTable()),
       global_route_config_(global_route_config),
       per_filter_configs_(
-          THROW_OR_RETURN_VALUE(PerFilterConfigs::create(virtual_host.typed_per_filter_config(),
+          LEGACY_THROW_OR_RETURN_VALUE(PerFilterConfigs::create(virtual_host.typed_per_filter_config(),
                                                          factory_context, validator),
                                 std::unique_ptr<PerFilterConfigs>)),
       retry_shadow_buffer_limit_(PROTOBUF_GET_WRAPPED_OR_DEFAULT(
@@ -1833,14 +1833,14 @@ CommonVirtualHostImpl::CommonVirtualHostImpl(
   if (!virtual_host.request_headers_to_add().empty() ||
       !virtual_host.request_headers_to_remove().empty()) {
     request_headers_parser_ =
-        THROW_OR_RETURN_VALUE(HeaderParser::configure(virtual_host.request_headers_to_add(),
+        LEGACY_THROW_OR_RETURN_VALUE(HeaderParser::configure(virtual_host.request_headers_to_add(),
                                                       virtual_host.request_headers_to_remove()),
                               Router::HeaderParserPtr);
   }
   if (!virtual_host.response_headers_to_add().empty() ||
       !virtual_host.response_headers_to_remove().empty()) {
     response_headers_parser_ =
-        THROW_OR_RETURN_VALUE(HeaderParser::configure(virtual_host.response_headers_to_add(),
+        LEGACY_THROW_OR_RETURN_VALUE(HeaderParser::configure(virtual_host.response_headers_to_add(),
                                                       virtual_host.response_headers_to_remove()),
                               Router::HeaderParserPtr);
   }
@@ -2291,7 +2291,7 @@ CommonConfigImpl::CommonConfigImpl(const envoy::config::route::v3::RouteConfigur
                                    ProtobufMessage::ValidationVisitor& validator,
                                    absl::Status& creation_status)
     : name_(config.name()), symbol_table_(factory_context.scope().symbolTable()),
-      per_filter_configs_(THROW_OR_RETURN_VALUE(
+      per_filter_configs_(LEGACY_THROW_OR_RETURN_VALUE(
           PerFilterConfigs::create(config.typed_per_filter_config(), factory_context, validator),
           std::unique_ptr<PerFilterConfigs>)),
       max_direct_response_body_size_bytes_(
@@ -2312,7 +2312,7 @@ CommonConfigImpl::CommonConfigImpl(const envoy::config::route::v3::RouteConfigur
   // Initialize all cluster specifier plugins before creating route matcher. Because the route may
   // reference it by name.
   for (const auto& plugin_proto : config.cluster_specifier_plugins()) {
-    auto plugin = THROW_OR_RETURN_VALUE(
+    auto plugin = LEGACY_THROW_OR_RETURN_VALUE(
         getClusterSpecifierPluginByTheProto(plugin_proto, validator, factory_context),
         ClusterSpecifierPluginSharedPtr);
     cluster_specifier_plugins_.emplace(plugin_proto.extension().name(), std::move(plugin));
@@ -2324,13 +2324,13 @@ CommonConfigImpl::CommonConfigImpl(const envoy::config::route::v3::RouteConfigur
 
   if (!config.request_headers_to_add().empty() || !config.request_headers_to_remove().empty()) {
     request_headers_parser_ =
-        THROW_OR_RETURN_VALUE(HeaderParser::configure(config.request_headers_to_add(),
+        LEGACY_THROW_OR_RETURN_VALUE(HeaderParser::configure(config.request_headers_to_add(),
                                                       config.request_headers_to_remove()),
                               Router::HeaderParserPtr);
   }
   if (!config.response_headers_to_add().empty() || !config.response_headers_to_remove().empty()) {
     response_headers_parser_ =
-        THROW_OR_RETURN_VALUE(HeaderParser::configure(config.response_headers_to_add(),
+        LEGACY_THROW_OR_RETURN_VALUE(HeaderParser::configure(config.response_headers_to_add(),
                                                       config.response_headers_to_remove()),
                               Router::HeaderParserPtr);
   }
@@ -2538,7 +2538,7 @@ Matcher::ActionFactoryCb RouteMatchActionFactory::createActionFactoryCb(
   const auto& route_config =
       MessageUtil::downcastAndValidate<const envoy::config::route::v3::Route&>(config,
                                                                                validation_visitor);
-  auto route = THROW_OR_RETURN_VALUE(
+  auto route = LEGACY_THROW_OR_RETURN_VALUE(
       RouteCreator::createAndValidateRoute(route_config, context.vhost, context.factory_context,
                                            validation_visitor, absl::nullopt),
       RouteEntryImplBaseConstSharedPtr);
@@ -2556,7 +2556,7 @@ Matcher::ActionFactoryCb RouteListMatchActionFactory::createActionFactoryCb(
 
   std::vector<RouteEntryImplBaseConstSharedPtr> routes;
   for (const auto& route : route_config.routes()) {
-    routes.emplace_back(THROW_OR_RETURN_VALUE(
+    routes.emplace_back(LEGACY_THROW_OR_RETURN_VALUE(
         RouteCreator::createAndValidateRoute(route, context.vhost, context.factory_context,
                                              validation_visitor, absl::nullopt),
         RouteEntryImplBaseConstSharedPtr));

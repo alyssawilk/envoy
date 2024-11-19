@@ -19,6 +19,28 @@ namespace Envoy {
 #else
 #define throwEnvoyExceptionOrPanic(x) throw ::Envoy::EnvoyException(x)
 #define throwExceptionOrPanic(y, x) throw y(x)
+
+#define THROW_IF_NOT_OK_REF(status)                                                                \
+  do {                                                                                             \
+    if (!(status).ok()) {                                                                          \
+      throw EnvoyException(std::string((status).message()));                                 \
+    }                                                                                              \
+  } while (0)
+
+// Simple macro to handle bridging functions which return absl::StatusOr, and
+// functions which throw errors.
+#define THROW_IF_NOT_OK(status_fn)                                                                 \
+  do {                                                                                             \
+    const absl::Status status = (status_fn);                                                       \
+    THROW_IF_NOT_OK_REF(status);                                                                   \
+  } while (0)
+
+template <class Type> Type returnOrThrow(absl::StatusOr<Type> type_or_error) {
+  THROW_IF_NOT_OK_REF(type_or_error.status());
+  return std::move(type_or_error.value());
+}
+
+#define THROW_OR_RETURN_VALUE(expression, type) ::Envoy::returnOrThrow<type>(expression)
 #endif
 
 /**
@@ -35,20 +57,19 @@ public:
     return;                                                                                        \
   }
 
-#define THROW_IF_NOT_OK_REF(status)                                                                \
+#define LEGACY_THROW_IF_NOT_OK_REF(status)                                                                \
   do {                                                                                             \
     if (!(status).ok()) {                                                                          \
       throwEnvoyExceptionOrPanic(std::string((status).message()));                                 \
     }                                                                                              \
   } while (0)
 
-// Simple macro to handle bridging functions which return absl::StatusOr, and
-// functions which throw errors.
-#define THROW_IF_NOT_OK(status_fn)                                                                 \
+#define LEGACY_THROW_IF_NOT_OK(status_fn)                                                                 \
   do {                                                                                             \
     const absl::Status status = (status_fn);                                                       \
-    THROW_IF_NOT_OK_REF(status);                                                                   \
+    LEGACY_THROW_IF_NOT_OK_REF(status);                                                                   \
   } while (0)
+
 
 #define RETURN_IF_NOT_OK_REF(variable)                                                             \
   if (const absl::Status& temp_status = variable; !temp_status.ok()) {                             \
@@ -61,11 +82,11 @@ public:
     return temp_status;                                                                            \
   }
 
-template <class Type> Type returnOrThrow(absl::StatusOr<Type> type_or_error) {
-  THROW_IF_NOT_OK_REF(type_or_error.status());
+template <class Type> Type legacyReturnOrThrow(absl::StatusOr<Type> type_or_error) {
+  LEGACY_THROW_IF_NOT_OK_REF(type_or_error.status());
   return std::move(type_or_error.value());
 }
 
-#define THROW_OR_RETURN_VALUE(expression, type) ::Envoy::returnOrThrow<type>(expression)
+#define LEGACY_THROW_OR_RETURN_VALUE(expression, type) legacyReturnOrThrow<type>(expression)
 
 } // namespace Envoy

@@ -22,7 +22,7 @@ public:
 
   BodyFormatter(const envoy::config::core::v3::SubstitutionFormatString& config,
                 Server::Configuration::GenericFactoryContext& context)
-      : formatter_(THROW_OR_RETURN_VALUE(
+      : formatter_(LEGACY_THROW_OR_RETURN_VALUE(
             Formatter::SubstitutionFormatStringUtils::fromProtoConfig(config, context),
             Formatter::FormatterBasePtr<Formatter::HttpFormatterContext>)),
         content_type_(
@@ -66,7 +66,7 @@ public:
       status_code_ = static_cast<Http::Code>(config.status_code().value());
     }
     if (config.has_body()) {
-      body_ = THROW_OR_RETURN_VALUE(
+      body_ = LEGACY_THROW_OR_RETURN_VALUE(
           Config::DataSource::read(config.body(), true, context.serverFactoryContext().api()),
           std::string);
     }
@@ -75,7 +75,7 @@ public:
       body_formatter_ = std::make_unique<BodyFormatter>(config.body_format_override(), context);
     }
 
-    header_parser_ = THROW_OR_RETURN_VALUE(
+    header_parser_ = LEGACY_THROW_OR_RETURN_VALUE(
         Envoy::Router::HeaderParser::configure(config.headers_to_add()), HeaderParserPtr);
   }
 

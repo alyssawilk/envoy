@@ -79,7 +79,7 @@ FilterConfigSubscription::FilterConfigSubscription(
       subscription_id_(subscription_id) {
   const auto resource_name = getResourceName();
   subscription_ =
-      THROW_OR_RETURN_VALUE(cluster_manager.subscriptionFactory().subscriptionFromConfigSource(
+      LEGACY_THROW_OR_RETURN_VALUE(cluster_manager.subscriptionFactory().subscriptionFromConfigSource(
                                 config_source, Grpc::Common::typeUrl(resource_name), *scope_, *this,
                                 resource_decoder_, {}),
                             Config::SubscriptionPtr);
@@ -137,7 +137,7 @@ FilterConfigSubscription::onConfigUpdate(const std::vector<Config::DecodedResour
       filter_config_providers_,
       [last = last_](DynamicFilterConfigProviderImplBase* provider,
                      std::shared_ptr<Cleanup> cleanup) {
-        THROW_IF_NOT_OK(
+        LEGACY_THROW_IF_NOT_OK(
             provider->onConfigUpdate(*last->config_, last->version_info_, [cleanup] {}));
       },
       [me = shared_from_this()]() { me->updateComplete(); });
@@ -158,7 +158,7 @@ absl::Status FilterConfigSubscription::onConfigUpdate(
     Common::applyToAllWithCleanup<DynamicFilterConfigProviderImplBase*>(
         filter_config_providers_,
         [](DynamicFilterConfigProviderImplBase* provider, std::shared_ptr<Cleanup> cleanup) {
-          THROW_IF_NOT_OK(provider->onConfigRemoved([cleanup] {}));
+          LEGACY_THROW_IF_NOT_OK(provider->onConfigRemoved([cleanup] {}));
         },
         [me = shared_from_this()]() { me->updateComplete(); });
   } else if (!added_resources.empty()) {
@@ -228,7 +228,7 @@ void FilterConfigProviderManagerImplBase::applyLastOrDefaultConfig(
   bool last_config_valid = false;
   if (subscription->lastConfig()) {
     TRY_ASSERT_MAIN_THREAD {
-      THROW_IF_NOT_OK(provider.validateTypeUrl(subscription->lastTypeUrl()));
+      LEGACY_THROW_IF_NOT_OK(provider.validateTypeUrl(subscription->lastTypeUrl()));
       provider.validateMessage(filter_config_name, *subscription->lastConfig(),
                                subscription->lastFactoryName());
       last_config_valid = true;
@@ -240,14 +240,14 @@ void FilterConfigProviderManagerImplBase::applyLastOrDefaultConfig(
     });
 
     if (last_config_valid) {
-      THROW_IF_NOT_OK(provider.onConfigUpdate(*subscription->lastConfig(),
+      LEGACY_THROW_IF_NOT_OK(provider.onConfigUpdate(*subscription->lastConfig(),
                                               subscription->lastVersionInfo(), nullptr));
     }
   }
 
   // Apply the default config if none has been applied.
   if (!last_config_valid) {
-    THROW_IF_NOT_OK(provider.applyDefaultConfiguration());
+    LEGACY_THROW_IF_NOT_OK(provider.applyDefaultConfiguration());
   }
 }
 
@@ -265,7 +265,7 @@ absl::Status FilterConfigProviderManagerImplBase::validateProtoConfigDefaultFact
 
 void FilterConfigProviderManagerImplBase::validateProtoConfigTypeUrl(
     const std::string& type_url, const absl::flat_hash_set<std::string>& require_type_urls) const {
-  THROW_IF_NOT_OK(validateTypeUrlHelper(type_url, require_type_urls));
+  LEGACY_THROW_IF_NOT_OK(validateTypeUrlHelper(type_url, require_type_urls));
 }
 
 } // namespace Filter

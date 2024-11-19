@@ -207,7 +207,7 @@ public:
     auto* factory =
         Registry::FactoryRegistry<NeutralHttpFilterConfigFactory>::getFactory(factory_name);
     const bool is_terminal_filter = factory->isTerminalFilterByProto(message, server_context_);
-    THROW_IF_NOT_OK(Config::Utility::validateTerminalFilters(config_name, factory_name,
+    LEGACY_THROW_IF_NOT_OK(Config::Utility::validateTerminalFilters(config_name, factory_name,
                                                              filter_chain_type_, is_terminal_filter,
                                                              last_filter_in_filter_chain_));
   }
@@ -271,7 +271,7 @@ public:
         Registry::FactoryRegistry<NeutralNetworkFilterConfigFactory>::getFactory(factory_name);
     const bool is_terminal_filter =
         factory->isTerminalFilterByProto(message, this->server_context_);
-    THROW_IF_NOT_OK(Config::Utility::validateTerminalFilters(
+    LEGACY_THROW_IF_NOT_OK(Config::Utility::validateTerminalFilters(
         config_name, factory_name, this->filter_chain_type_, is_terminal_filter,
         this->last_filter_in_filter_chain_));
   }
@@ -610,7 +610,7 @@ public:
 
     ProtobufTypes::MessagePtr default_config;
     if (config_source.has_default_config()) {
-      default_config = THROW_OR_RETURN_VALUE(
+      default_config = LEGACY_THROW_OR_RETURN_VALUE(
           getDefaultConfig(config_source.default_config(), filter_config_name, server_context,
                            last_filter_in_filter_chain, filter_chain_type, require_type_urls),
           ProtobufTypes::MessagePtr);
@@ -695,7 +695,7 @@ protected:
   void validateFilters(const std::string& filter_config_name, const std::string& filter_type,
                        const std::string& filter_chain_type, bool is_terminal_filter,
                        bool last_filter_in_filter_chain) const override {
-    THROW_IF_NOT_OK(Config::Utility::validateTerminalFilters(filter_config_name, filter_type,
+    LEGACY_THROW_IF_NOT_OK(Config::Utility::validateTerminalFilters(filter_config_name, filter_type,
                                                              filter_chain_type, is_terminal_filter,
                                                              last_filter_in_filter_chain));
   }
@@ -723,7 +723,7 @@ protected:
   void validateFilters(const std::string& filter_config_name, const std::string& filter_type,
                        const std::string& filter_chain_type, bool is_terminal_filter,
                        bool last_filter_in_filter_chain) const override {
-    THROW_IF_NOT_OK(Config::Utility::validateTerminalFilters(filter_config_name, filter_type,
+    LEGACY_THROW_IF_NOT_OK(Config::Utility::validateTerminalFilters(filter_config_name, filter_type,
                                                              filter_chain_type, is_terminal_filter,
                                                              last_filter_in_filter_chain));
   }
@@ -751,7 +751,7 @@ protected:
   void validateFilters(const std::string& filter_config_name, const std::string& filter_type,
                        const std::string& filter_chain_type, bool is_terminal_filter,
                        bool last_filter_in_filter_chain) const override {
-    THROW_IF_NOT_OK(Config::Utility::validateTerminalFilters(filter_config_name, filter_type,
+    LEGACY_THROW_IF_NOT_OK(Config::Utility::validateTerminalFilters(filter_config_name, filter_type,
                                                              filter_chain_type, is_terminal_filter,
                                                              last_filter_in_filter_chain));
   }

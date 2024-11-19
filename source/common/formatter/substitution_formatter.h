@@ -410,7 +410,7 @@ public:
     for (JsonFormatBuilder::FormatElement& element :
          JsonFormatBuilder().fromStruct(struct_format)) {
       if (element.is_template_) {
-        parsed_elements_.emplace_back(THROW_OR_RETURN_VALUE(
+        parsed_elements_.emplace_back(LEGACY_THROW_OR_RETURN_VALUE(
             SubstitutionFormatParser::parse<FormatterContext>(element.value_, commands),
             std::vector<FormatterProviderBasePtr<FormatterContext>>));
       } else {

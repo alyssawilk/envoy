@@ -94,7 +94,7 @@ HeaderUtility::createHeaderData(const envoy::config::route::v3::HeaderMatcher& c
     return std::make_unique<HeaderDataExactMatch>(config);
     break;
   case envoy::config::route::v3::HeaderMatcher::HeaderMatchSpecifierCase::kSafeRegexMatch:
-    return THROW_OR_RETURN_VALUE(HeaderDataRegexMatch::create(config, factory_context),
+    return LEGACY_THROW_OR_RETURN_VALUE(HeaderDataRegexMatch::create(config, factory_context),
                                  std::unique_ptr<HeaderDataRegexMatch>);
     break;
   case envoy::config::route::v3::HeaderMatcher::HeaderMatchSpecifierCase::kRangeMatch:

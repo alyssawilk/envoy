@@ -308,12 +308,12 @@ public:
     auto type = std::string(TypeUtil::typeUrlToDescriptorFullName(typed_config.type_url()));
     if (type == typed_struct_type) {
       xds::type::v3::TypedStruct typed_struct;
-      THROW_IF_NOT_OK(MessageUtil::unpackTo(typed_config, typed_struct));
+      LEGACY_THROW_IF_NOT_OK(MessageUtil::unpackTo(typed_config, typed_struct));
       // Not handling nested structs or typed structs in typed structs
       return std::string(TypeUtil::typeUrlToDescriptorFullName(typed_struct.type_url()));
     } else if (type == legacy_typed_struct_type) {
       udpa::type::v1::TypedStruct typed_struct;
-      THROW_IF_NOT_OK(MessageUtil::unpackTo(typed_config, typed_struct));
+      LEGACY_THROW_IF_NOT_OK(MessageUtil::unpackTo(typed_config, typed_struct));
       // Not handling nested structs or typed structs in typed structs
       return std::string(TypeUtil::typeUrlToDescriptorFullName(typed_struct.type_url()));
     }
@@ -353,7 +353,7 @@ public:
     // Check that the config type is not google.protobuf.Empty
     RELEASE_ASSERT(config->GetTypeName() != "google.protobuf.Empty", "");
 
-    THROW_IF_NOT_OK(
+    LEGACY_THROW_IF_NOT_OK(
         translateOpaqueConfig(enclosing_message.typed_config(), validation_visitor, *config));
     return config;
   }
@@ -378,7 +378,7 @@ public:
     // Check that the config type is not google.protobuf.Empty
     RELEASE_ASSERT(config->GetTypeName() != "google.protobuf.Empty", "");
 
-    THROW_IF_NOT_OK(translateOpaqueConfig(typed_config, validation_visitor, *config));
+    LEGACY_THROW_IF_NOT_OK(translateOpaqueConfig(typed_config, validation_visitor, *config));
     return config;
   }
 

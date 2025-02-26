@@ -67,7 +67,7 @@ public:
       return existing_provider;
     }
     using PtrPair = std::pair<RouteConfigProviderSharedPtr, const Init::Target*>;
-    auto new_provider = THROW_OR_RETURN_VALUE(create_dynamic_provider(manager_identifier), PtrPair);
+    auto new_provider = LEGACY_THROW_OR_RETURN_VALUE(create_dynamic_provider(manager_identifier), PtrPair);
     init_manager.add(*new_provider.second);
     dynamic_route_config_providers_.insert({manager_identifier, new_provider});
     return new_provider.first;

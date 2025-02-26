@@ -155,7 +155,7 @@ public:
   template <class RegexMatcherType>
   RegexStringMatcher(const RegexMatcherType& safe_regex,
                      Server::Configuration::CommonFactoryContext& context)
-      : regex_(THROW_OR_RETURN_VALUE(Regex::Utility::parseRegex(safe_regex, context.regexEngine()),
+      : regex_(LEGACY_THROW_OR_RETURN_VALUE(Regex::Utility::parseRegex(safe_regex, context.regexEngine()),
                                      Regex::CompiledMatcherPtr)) {}
 
   RegexStringMatcher(RegexStringMatcher&& other) { regex_ = std::move(other.regex_); }

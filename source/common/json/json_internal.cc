@@ -619,12 +619,12 @@ bool ObjectHandler::start_object(std::size_t) {
 
   switch (state_) {
   case State::ExpectValueOrStartObjectArray:
-    THROW_IF_NOT_OK(stack_.top()->insert(key_, object));
+    LEGACY_THROW_IF_NOT_OK(stack_.top()->insert(key_, object));
     stack_.push(object);
     state_ = State::ExpectKeyOrEndObject;
     return true;
   case State::ExpectArrayValueOrEndArray:
-    THROW_IF_NOT_OK(stack_.top()->append(object));
+    LEGACY_THROW_IF_NOT_OK(stack_.top()->append(object));
     stack_.push(object);
     state_ = State::ExpectKeyOrEndObject;
     return true;
@@ -673,12 +673,12 @@ bool ObjectHandler::start_array(std::size_t) {
 
   switch (state_) {
   case State::ExpectValueOrStartObjectArray:
-    THROW_IF_NOT_OK(stack_.top()->insert(key_, array));
+    LEGACY_THROW_IF_NOT_OK(stack_.top()->insert(key_, array));
     stack_.push(array);
     state_ = State::ExpectArrayValueOrEndArray;
     return true;
   case State::ExpectArrayValueOrEndArray:
-    THROW_IF_NOT_OK(stack_.top()->append(array));
+    LEGACY_THROW_IF_NOT_OK(stack_.top()->append(array));
     stack_.push(array);
     return true;
   case State::ExpectRoot:
@@ -717,10 +717,10 @@ bool ObjectHandler::handleValueEvent(FieldSharedPtr ptr) {
   switch (state_) {
   case State::ExpectValueOrStartObjectArray:
     state_ = State::ExpectKeyOrEndObject;
-    THROW_IF_NOT_OK(stack_.top()->insert(key_, ptr));
+    LEGACY_THROW_IF_NOT_OK(stack_.top()->insert(key_, ptr));
     return true;
   case State::ExpectArrayValueOrEndArray:
-    THROW_IF_NOT_OK(stack_.top()->append(ptr));
+    LEGACY_THROW_IF_NOT_OK(stack_.top()->append(ptr));
     return true;
   default:
     return true;
@@ -786,7 +786,7 @@ loadFromProtobufStructInternal(const ProtobufWkt::Struct& protobuf_struct) {
 }
 
 ObjectSharedPtr Factory::loadFromProtobufStruct(const ProtobufWkt::Struct& protobuf_struct) {
-  return THROW_OR_RETURN_VALUE(loadFromProtobufStructInternal(protobuf_struct), ObjectSharedPtr);
+  return LEGACY_THROW_OR_RETURN_VALUE(loadFromProtobufStructInternal(protobuf_struct), ObjectSharedPtr);
 }
 
 std::string Factory::serialize(absl::string_view str) {

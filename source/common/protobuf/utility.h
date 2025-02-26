@@ -429,7 +429,7 @@ public:
    */
   template <class MessageType>
   static inline void anyConvert(const ProtobufWkt::Any& message, MessageType& typed_message) {
-    THROW_IF_NOT_OK(unpackTo(message, typed_message));
+    LEGACY_THROW_IF_NOT_OK(unpackTo(message, typed_message));
   };
 
   template <class MessageType>
